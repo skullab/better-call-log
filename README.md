@@ -55,7 +55,7 @@ options.level = BetterCall.Level.WARNING;
 options.ignoreAssert = true;
 options.style = new BetterCall.StyleANSI();
 options.compactMode = true;
-options.compacttCollapsed = true;
+options.compactCollapsed = true;
 ```
 or change the default options like this
 ```js
