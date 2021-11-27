@@ -1,5 +1,5 @@
 export class BetterCallStylePackage {
     public style:string;
     public tag:string;
-    public order:object;
+    public order:{tag:number,style:number};
 }
