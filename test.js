@@ -1,4 +1,4 @@
-const BetterCall = require('./dist/better-call-log-node') ;
+const BetterCall = require('./dist/better-call-log') ;
 
 const o = new BetterCall.Options();
 o.level = BetterCall.Level.WARNING;

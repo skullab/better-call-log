@@ -41,7 +41,7 @@ const nodeConfig = {
     externals: [nodeExternals()],
     output: {
         path: path.resolve(__dirname, 'dist'),
-        filename: "better-call-log-node.js",
+        filename: "better-call-log.js",
         libraryTarget: 'umd',
         libraryExport: 'default',
     }

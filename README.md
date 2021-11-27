@@ -12,7 +12,7 @@ npm run build
 ```
 ### For NodeJS
 ```js
-const BetterCall = require('better-call-log-node') ;
+const BetterCall = require('better-call-log') ;
 ```
 ## Common
 ```js
