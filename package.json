@@ -1,6 +1,6 @@
 {
   "name": "better-call-log",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "An Attractive better console",
   "main": "dist/better-call-log.js",
   "url": "https://github.com/skullab/better-call-log",
