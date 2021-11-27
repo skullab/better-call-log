@@ -1,4 +1,4 @@
-![alt BetterCallLogo](src/images/better_call_log_logo.png)
+![alt BetterCallLogo](https://raw.githubusercontent.com/skullab/better-call-log/master/src/images/better_call_log_logo.png)
 
 # An Attractive better console
 
