@@ -36,10 +36,10 @@ b.timeEnd('my process');
 
 ## Here's what you will see
 In the browser<br>
-![alt browser-results](https://raw.githubusercontent.com/skullab/better-call-log/master/src/images/browser_results.png);
+![alt browser-results](https://raw.githubusercontent.com/skullab/better-call-log/master/src/images/browser_results.png)
 
 In NodeJS<br>
-![alt nodejs-results](https://raw.githubusercontent.com/skullab/better-call-log/master/src/images/nodejs_results.png);
+![alt nodejs-results](https://raw.githubusercontent.com/skullab/better-call-log/master/src/images/nodejs_results.png)
 ## Advanced
 ```js
 const b = new BetterCall.Log(name?: string, options?: BetterCallOptions);
