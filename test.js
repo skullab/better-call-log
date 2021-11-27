@@ -1,6 +1,14 @@
 const BetterCall = require('./dist/better-call-log-node') ;
 
-const b = new BetterCall();
+const o = new BetterCall.Options();
+o.level = BetterCall.Level.WARNING;
+o.ignoreAssert = true;
+o.style = new BetterCall.StyleANSI();
+o.compactMode = true ;
+o.compacttCollapsed = true ;
+
+const b = new BetterCall.Log('my logger');
+
 b.clear();
 b.info('TEST');
 b.log('TEST');
