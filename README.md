@@ -105,6 +105,41 @@ b.options.style = new BetterCall.StyleANSI();
 ```
 > By default, in browser it's used <em>BetterCallStyleCSS</em>, while in NodeJS it's used BetterCallStyleANSI
 
+### Extend Style
+You can extend the <em>BetterCallStyle</em> class to create a custom style.
+```typescript
+public abstract package(tag:string):BetterCallStylePackage;
+```
+You will have to implement the <em>package</em> method which will have to return a <em>BetterCallStylePackage</em> object.
+```typescript
+export class BetterCallStylePackage {
+    public style:string;
+    public tag:string;
+    public order:object;
+}
+```
+The <em>style</em> property will contain the style, the <em>tag</em> property the call tag, while the <em>order</em> property the sort order (zero index) to be shown in the console, if the style before and after the tag or vice versa.
+#### Example
+```js
+const b = new BetterCall.Log('my logger');
+class MyStyle extends BetterCall.Style {
+    package(tag){
+        var style = 'color:#FFF;padding:6px;border-radius:2px;font-size:1.2em;';
+        if(tag == 'log'){
+            style += 'background-color:#6f0c55;';
+        }else{
+            style += 'background-color:#808080;';
+        }
+        return {style:style,tag:'%c'+tag.toUpperCase(),order:{tag:0,style:1}};
+    }
+}
+b.options.style = new MyStyle();
+b.log('hello world');
+b.info('hello world');
+```
+#### Result
+![alt custom-style](https://raw.githubusercontent.com/skullab/better-call-log/master/src/images/custom_style.png)
+
 ## Static usage
 
 BetterCall can be used statically like this
