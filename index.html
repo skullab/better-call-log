@@ -11,6 +11,8 @@
     <script>
         document.addEventListener('DOMContentLoaded',function(){
             var b = new BetterCall.Log();
+            //b.options.compactMode = true ;
+            //b.options.compactCollapsed = true;
             b.clear();
             b.info('TEST');
             b.log('TEST');
@@ -26,6 +28,10 @@
             b.timeLog('my process');
             b.assert(true,'hello');
             b.timeEnd('my process');
+
+            b.group('my label');
+            b.info('test');
+            b.groupEnd();
         });
     </script>
 </html>

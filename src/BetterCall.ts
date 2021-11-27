@@ -128,7 +128,7 @@ export class BetterCall implements BetterCallInterface{
     group(label?: string) {
         if(this.isOff())return;
         label = label ?? this.name;
-        console.group(label);
+        this.fire('group',label);
     }
 
     public static groupCollapsed(label?: string){
@@ -241,8 +241,8 @@ export class BetterCall implements BetterCallInterface{
         for(let i = 0 ; i < 25 - name.length ; i++)nameSpaces += ' ';
 
         let content = [] ;
-        content[p.order['tag']] = p.tag + tagSpaces + '➤ ' + name + nameSpaces + (this.options.showTimestamp ? '➤' + this.timeStamp() : '');
-        content[p.order['style']] = p.style ;
+        content[p.order.tag] = p.tag + tagSpaces + '➤ ' + name + nameSpaces + (this.options.showTimestamp ? '➤' + this.timeStamp() : '');
+        content[p.order.style] = p.style ;
         content.push('\n↳');
 
         if(this.options.compactMode){

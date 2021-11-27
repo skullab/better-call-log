@@ -24,3 +24,7 @@ b.log('test');
 b.timeLog('my process');
 b.assert(true,'hello');
 b.timeEnd('my process');
+
+b.group('my label');
+b.info('test');
+b.groupEnd();
