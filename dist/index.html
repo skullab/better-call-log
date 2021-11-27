@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Better Call LOG</title>
+    <script defer src="better-call-log-browser.js"></script></head>
+    <body>
+        <img src="../src/images/better_call_log_logo.png" alt="better call log">
+        <h2>Check your console - press F12</h2>
+    </body>
+    <script>
+        document.addEventListener('DOMContentLoaded',function(){
+            var b = new BetterCall();
+            b.clear();
+            b.info('TEST');
+            b.log('TEST');
+            b.debug('TEST');
+            b.warn('TEST');
+            b.error('TEST');
+
+            b.trace();
+            b.table({a:1,b:2,c:3},'MY TABLE');
+
+            b.time('my process');
+            b.log('test');
+            b.timeLog('my process');
+            b.assert(true,'hello');
+            b.timeEnd('my process');
+        });
+    </script>
+</html>
