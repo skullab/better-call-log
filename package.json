@@ -2,6 +2,7 @@
   "name": "better-call-log",
   "version": "0.0.5",
   "description": "An Attractive better console",
+  "main": "dist/better-call-log.js",
   "url": "https://github.com/skullab/better-call-log",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
