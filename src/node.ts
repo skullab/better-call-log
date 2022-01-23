@@ -6,6 +6,7 @@ import { BetterCallStyleANSI as StyleANSI} from './BetterCallStyleANSI';
 import { BetterCallStyleObject as StyleObject} from './BetterCallStyleObject';
 import { BetterCallStylePackage as StylePackage} from './BetterCallStylePackage';
 import { BetterCallLevel as Level} from './BetterCallLevel';
+import { BetterCallTransport as Transport } from './BetterCallTransport';
 
 export default {
     Log,
@@ -15,5 +16,6 @@ export default {
     StyleANSI,
     StyleCSS,
     StyleObject,
-    StylePackage
+    StylePackage,
+    Transport,
 }

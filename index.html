@@ -11,8 +11,10 @@
     <script>
         document.addEventListener('DOMContentLoaded',function(){
             var b = new BetterCall.Log();
-            //b.options.compactMode = true ;
-            //b.options.compactCollapsed = true;
+            b.options.timeZone = "Europe/Rome";
+            b.options.locale = "it-IT";
+            b.options.compactMode = true ;
+
             b.clear();
             b.info('TEST');
             b.log('TEST');

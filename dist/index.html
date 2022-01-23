@@ -1,7 +1,20 @@
-<!doctype html><html><head><meta charset="utf-8"/><title>Better Call LOG</title><script defer="defer" src="better-call-log-browser.js"></script></head><body><img src="../src/images/better_call_log_logo.png" alt="better call log"><h2>Check your console - press F12</h2></body><script>document.addEventListener('DOMContentLoaded',function(){
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Better Call LOG</title>
+    <script defer src="better-call-log-browser.js"></script></head>
+    <body>
+        <img src="../src/images/better_call_log_logo.png" alt="better call log">
+        <h2>Check your console - press F12</h2>
+    </body>
+    <script>
+        document.addEventListener('DOMContentLoaded',function(){
             var b = new BetterCall.Log();
-            //b.options.compactMode = true ;
-            //b.options.compactCollapsed = true;
+            b.options.timeZone = "Europe/Rome";
+            b.options.locale = "it-IT";
+            b.options.compactMode = true ;
+
             b.clear();
             b.info('TEST');
             b.log('TEST');
@@ -21,4 +34,6 @@
             b.group('my label');
             b.info('test');
             b.groupEnd();
-        });</script></html>
+        });
+    </script>
+</html>

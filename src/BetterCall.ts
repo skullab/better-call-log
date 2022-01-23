@@ -1,16 +1,9 @@
 import { BetterCallInterface } from "./BetterCallInterface";
 import { BetterCallLevel } from "./BetterCallLevel";
 import { BetterCallOptions } from "./BetterCallOptions";
+import { DateTime } from "luxon";
 
 export class BetterCall implements BetterCallInterface{
-
-    public static LEVEL_OFF:number      = 0x00 ;
-    public static LEVEL_INFO:number     = 0x10 ;
-    public static LEVEL_LOG:number      = 0x20 ;
-    public static LEVEL_DEBUG:number    = 0x30 ;
-    public static LEVEL_WARNING:number  = 0x40 ;
-    public static LEVEL_ERROR:number    = 0x50 ;
-    
 
     public options:BetterCallOptions ;
     public name:string;
@@ -58,6 +51,9 @@ export class BetterCall implements BetterCallInterface{
         }
         if(assertion && !this.options.ignoreAssert){
             console.info('ASSERTION ',...args);
+            if(this.options.fileTransport){
+                this.options.fileTransport.outRaw('ASSERTION',...args);
+            }
         }
         console.assert(...args);
         if(!assertion || !this.options.ignoreAssert){
@@ -172,6 +168,9 @@ export class BetterCall implements BetterCallInterface{
         if(this.isOff())return;
         this.fire('group','TABLE', name ?? this.name);
         console.table(data,columns);
+        if(this.options.fileTransport){
+            this.options.fileTransport.table(data,columns);
+        }
         this.groupEnd();
     }
 
@@ -207,14 +206,10 @@ export class BetterCall implements BetterCallInterface{
         return BetterCall.getInstance().timeStamp(label);
     }
     timeStamp(label?: string):string {
-        let options:Intl.DateTimeFormatOptions = {
-            year: 'numeric', month: 'numeric', day: 'numeric',
-            hour: 'numeric', minute: 'numeric', second: 'numeric',
-            hour12: false,
-        };
-        // TODO use luxon
-        let locale = typeof navigator !== 'undefined' ? navigator.language : 'en-EN' ;
-        return label ?? '' + ' ' +Intl.DateTimeFormat(locale,options).format(new Date())
+        const now = DateTime.now().setZone(this.options.timeZone).setLocale(this.options.locale);
+        // const date = now.setLocale(this.options.locale).toLocaleString(this.options.dateTimeFormat);
+        const date = this.options.useISOTime ? now.toISO() : now.toLocaleString(this.options.dateTimeFormat);
+        return label ?? '' + ' ' + date ;
     }
 
     public static trace(...args: any[]){
@@ -251,6 +246,9 @@ export class BetterCall implements BetterCallInterface{
         }
 
         console[tag].apply(this,(this.options.compactMode ? args : content.concat(args)));
+        if(this.options.fileTransport){
+            this.options.fileTransport.out(content[p.order.tag],...args);
+        }
         if(this.options.compactMode){
             console.groupEnd.call(this);
         }
