@@ -2,9 +2,9 @@
 
 # An Attractive better console
 
-### Build
+### Installation
 ```bash
-npm run build
+npm i better-call-log
 ```
 ### For Browser
 ```html
@@ -151,3 +151,30 @@ c.info('hello static world !');
 // get the singleton instance
 BetterCall.Log.getInstance();
 ```
+## Luxon Support
+
+From version 0.0.8 luxon library support is available for the timestamp
+```js
+const o = new BetterCall.Options();
+o.timeZone = "Europe/Rome";
+o.locale = "it-IT"
+o.useISOTime = true ;
+```
+## File Transport (NodeJS only)
+
+From version 0.0.8 you can write a log to file
+```js
+// Usage
+const o = new BetterCall.Options();
+o.fileTransport = new BetterCall.Transport('./my_logger.log');
+// Or with options
+o.fileTransport = new BetterCall.Transport('./my_logger_once.log',{flag:"w+"});
+...
+// Class details
+export class BetterCallTransport {
+    constructor(filename: string, options?: fs.WriteFileOptions, throwable?: boolean){
+        ...
+    }
+}
+```
+If *fileTransport* is set, every call to log,debug,info,warn,error ecc... will be transferred to a file. By default, logs are appends to file.
