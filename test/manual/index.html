@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Better Call Log</title>
+		<link rel="shortcut icon" href="#" />
+		<script src="../../dist/better-call-log.umd.cjs"></script>
+	</head>
+	<body>
+		<div>
+			<h1>Check your console</h1>
+            <textarea id="console" cols="100" rows="10"></textarea>
+		</div>
+		<script>
+            document.getElementById('console').value = "";
+
+            const env = 'production'
+            const logLevel = env === 'production' ? BetterCall.Severity.WARNING : BetterCall.Severity.DEBUG;
+
+			const logger = new BetterCall.Logger({
+                severities: [logLevel],
+                transports:[new BetterCall.ConsoleTransport()]
+            });
+			logger.setTag("MYTAG");
+
+			logger.watch('*',[0,1,2,3,4,5],(message) => {
+                const formatter = new BetterCall.StringFormatter();
+                const m = formatter.format(message);
+				document.getElementById('console').value += m + '\n';
+			});
+
+			logger.to(new BetterCall.HttpTransport({
+                method:"get",
+                url:"http://127.0.0.1:5500/test/manual/index.html",
+                formatter:new BetterCall.JSONFormatter(['timestamp','tag','app_name','args'])
+            })).withTag('HTTP').warn('warning http');
+			
+            logger.err('err');
+			logger.withTag("other").info("info hello");
+            logger.warn('warning !',{abc:123},[1,2,3])
+            logger.debug("debug hello");
+		</script>
+	</body>
+</html>
