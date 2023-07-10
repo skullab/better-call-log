@@ -50,5 +50,8 @@ export abstract class Transport implements ILoggerTransport {
 		}
 		return true;
 	}
+	isFireableMessage(message: ILoggerMessage): boolean {
+		return this.isFireable(this.getSeverity(message.prival));
+	}
 	abstract transportLog(message: ILoggerMessage): Promise<boolean>;
 }

@@ -15,13 +15,14 @@
 		<script>
             document.getElementById('console').value = "";
 
-            const env = 'production'
+            const env = 'staging'
             const logLevel = env === 'production' ? BetterCall.Severity.WARNING : BetterCall.Severity.DEBUG;
 
 			const logger = new BetterCall.Logger({
+                transports : [new BetterCall.ConsoleTransport()],
                 severities: [logLevel],
-                transports:[new BetterCall.ConsoleTransport()]
             });
+            // console.log(new BetterCall.FileTransport({filename:'log.txt'}))
 			logger.setTag("MYTAG");
 
 			logger.watch('*',[0,1,2,3,4,5],(message) => {
