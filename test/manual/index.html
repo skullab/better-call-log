@@ -5,42 +5,87 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Better Call Log</title>
 		<link rel="shortcut icon" href="#" />
-		<script src="../../dist/better-call-log.umd.cjs"></script>
+		<script type="module">
+			import BetterCall from "../../dist/better-call-log.js";
+			const logger_module = new BetterCall.Logger();
+			// logger_module.debug("hello !");
+		</script>
 	</head>
 	<body>
 		<div>
 			<h1>Check your console</h1>
-            <textarea id="console" cols="100" rows="10"></textarea>
+			<textarea id="console" cols="100" rows="10"></textarea>
 		</div>
+		<script src="../../dist/better-call-log.umd.cjs"></script>
 		<script>
-            document.getElementById('console').value = "";
+			document.getElementById("console").value = "";
 
-            const env = 'staging'
-            const logLevel = env === 'production' ? BetterCall.Severity.WARNING : BetterCall.Severity.DEBUG;
+			const env = "staging";
+			const logLevel = env === "production" ? BetterCall.Severity.WARNING : BetterCall.Severity.DEBUG;
 
 			const logger = new BetterCall.Logger({
-                transports : [new BetterCall.ConsoleTransport()],
-                severities: [logLevel],
-            });
-            // console.log(new BetterCall.FileTransport({filename:'log.txt'}))
-			logger.setTag("MYTAG");
-
-			logger.watch('*',[0,1,2,3,4,5],(message) => {
-                const formatter = new BetterCall.StringFormatter();
-                const m = formatter.format(message);
-				document.getElementById('console').value += m + '\n';
+				transports: [
+					new BetterCall.ConsoleTransport({
+						formatter: new BetterCall.CSSFormatter(),
+					}),
+					new BetterCall.HttpTransport({
+						method: "get",
+						url: "http://127.0.0.1:5500/test/manual/index.html",
+						// formatter: new BetterCall.JSONFormatter(["timestamp", "tag", "app_name", "args"]),
+					}),
+				],
+				severities: [logLevel],
 			});
 
-			logger.to(new BetterCall.HttpTransport({
-                method:"get",
-                url:"http://127.0.0.1:5500/test/manual/index.html",
-                formatter:new BetterCall.JSONFormatter(['timestamp','tag','app_name','args'])
-            })).withTag('HTTP').warn('warning http');
-			
-            logger.err('err');
+			logger.setTimezone('Asia/Yangon');
+			logger.setTimezone('Pacific/Tongatapu');
+			logger.setTimezone('US/Samoa');
+			logger.setTimezone('US/Alaska');
+			logger.setTimezone('Pacific/Marquesas');
+			logger.setTimezone('Pacific/Majuro');
+			logger.setTimezone('Hongkong');
+			logger.setTimezone('Asia/Kathmandu');
+			logger.setTimezone('Asia/Tel_Aviv');
+			logger.setTimezone('Pacific/Chatham');
+			logger.setTimezone('America/New_York');
+			logger.setTimezone('Europe/Rome');
+			logger.setTimezone('Asia/Ust-Nera');
+
+			logger.debug('hello');
+			logger.setTag("MYTAG");
+			logger.debug('hello');
+
+			logger.watch("*", [0, 1, 2, 3, 4, 5], (message) => {
+				const formatter = new BetterCall.StringFormatter();
+				const m = formatter.format(message);
+				document.getElementById("console").value += m + "\n";
+			});
+
+			logger
+				.to(
+					new BetterCall.HttpTransport({
+						method: "get",
+						url: "http://127.0.0.1:5500/test/manual/index.html",
+						formatter: new BetterCall.JSONFormatter(["timestamp", "tag", "app_name", "args"]),
+					})
+				)
+				.withTag("HTTP")
+				.warn("warning http");
+
+			logger.err("err");
 			logger.withTag("other").info("info hello");
-            logger.warn('warning !',{abc:123},[1,2,3])
-            logger.debug("debug hello");
+			logger.warn("warning !", { abc: 123 }, [1, 2, 3]);
+
+			logger.group("group test");
+			const logger2 = logger.clone();
+			logger2.debug("cloned logger ");
+
+			for (let i = 0; i < 10; i++) {
+				logger.debug("inside group " + i);
+			}
+
+			logger.end();
+			logger.debug("end");
 		</script>
 	</body>
 </html>

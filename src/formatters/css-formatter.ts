@@ -33,9 +33,11 @@ export interface ICSSStyleGroup {
 }
 export class CSSFormatter extends Formatter {
 	protected styles: ICSSStyleGroup;
-	constructor(styles?: ICSSStyleGroup) {
+	protected carriageReturn: string|boolean;
+	constructor(styles?: ICSSStyleGroup, carriageReturn?: string|boolean) {
 		super();
-		this.styles = styles ?? this.getDefaultStyles();
+		this.styles = Object.assign(this.getDefaultStyles(), styles ?? {});
+		this.carriageReturn = carriageReturn === false ? false : typeof carriageReturn == 'string' ? carriageReturn : "\r\n ↳";
 	}
 	getDefaultStyles(): ICSSStyleGroup {
 		return {
@@ -88,12 +90,16 @@ export class CSSFormatter extends Formatter {
 		for (const [key, value] of Object.entries(style)) {
 			cssStyle += `${key}:${value};`;
 		}
-		return [
+		let _f = [
 			`%c${message.timestamp} ${severityName.toUpperCase()} ${message.app_name}${
 				message.tag ? "::" + message.tag : ""
 			}`,
 			cssStyle,
 			...message.args,
 		];
+		if(this.carriageReturn !== false && typeof this.carriageReturn == 'string'){
+			_f.splice(2,0,this.carriageReturn);
+		}
+		return _f;
 	}
 }

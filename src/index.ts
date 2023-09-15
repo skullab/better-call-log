@@ -8,7 +8,7 @@ import { SimpleFormatter } from "./formatters/simple-formatter";
 import { SyslogFormatter } from "./formatters/syslog-formatter";
 import { JSONFormatter } from "./formatters/json-formatter";
 import { CSSFormatter } from "./formatters/css-formatter";
-import {StringFormatter} from "./formatters/string-formatter";
+import { StringFormatter } from "./formatters/string-formatter";
 
 const BetterCall = Object.assign(
 	{

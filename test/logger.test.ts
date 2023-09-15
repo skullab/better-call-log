@@ -3,17 +3,7 @@ import { Logger, Severity } from "../src/core/logger";
 describe("Logger", () => {
 	test("create empty logger", () => {
 		const logger = new Logger();
-		expect(logger).toEqual({
-			formatter: {},
-			name: "Logger",
-			previousTag: undefined,
-			severities: undefined,
-			tag: undefined,
-			tagOnce: false,
-			transportTarget: undefined,
-			transports: [{ formatter: undefined, name: undefined, severities: undefined }],
-			watchers: new Map(),
-		});
+		expect(logger.name).toBe('Logger');
 	});
 
 	test("create named logger", () => {

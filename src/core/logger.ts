@@ -1,5 +1,5 @@
 import { SimpleFormatter } from "../formatters/simple-formatter";
-import { ConsoleTransport } from "../transports/console-transport";
+import { ConsoleTransport, IConsoleGroup } from "../transports/console-transport";
 
 export enum Severity {
 	EMERGENCY,
@@ -142,7 +142,7 @@ export class LoggerMessage implements ILoggerMessage {
 		this.version = options.version;
 		this.timestamp = options.timestamp;
 		this.time_numoffset = options.time_numoffset;
-		if (this.time_numoffset && /[+-][0-23]{2}:[0-59]{2}/.test(this.time_numoffset)) {
+		if (this.time_numoffset && /[+-][0-9]{2}:[0-59]{2}/.test(this.time_numoffset)) {
 			this.timestamp = this.timestamp.replace(this.time_offset, "") + this.time_numoffset;
 			this.time_offset = this.time_numoffset;
 		}
@@ -205,7 +205,7 @@ export class LoggerMessage implements ILoggerMessage {
 
 		let dateTime = this.timestamp.split("T");
 		let date = dateTime[0].split("-");
-		let time = dateTime[1].split(":");
+		let time = dateTime[1].replace(this.time_offset, "").split(":");
 		this.date_fullyear = date[0];
 		this.date_month = date[1];
 		this.date_mday = date[2];
@@ -213,7 +213,7 @@ export class LoggerMessage implements ILoggerMessage {
 		this.time_hour = time[0];
 		this.time_minute = time[1];
 		this.time_second = time[2].split(".")[0];
-		this.time_secfrac = time[2].split(".")[1].replace(this.time_offset, "");
+		this.time_secfrac = time[2].split(".")[1];
 		this.partial_time = this.time_hour + ":" + this.time_minute + ":" + this.time_second;
 		this.full_time = this.partial_time + this.time_offset;
 
@@ -229,6 +229,7 @@ export class LoggerMessage implements ILoggerMessage {
 			severity: Severity;
 			facility?: Facility;
 			timestamp?: string;
+			time_numoffset?: string;
 			version?: string;
 			hostname?: string;
 			app_name?: string;
@@ -261,6 +262,7 @@ export class LoggerMessage implements ILoggerMessage {
 				prival: options.facility * 8 + options.severity,
 				version: options.version,
 				timestamp: options.timestamp,
+				time_numoffset: options.time_numoffset,
 				hostname: options.hostname,
 				app_name: options.app_name,
 				procid: options.procid,
@@ -322,7 +324,9 @@ export class Logger implements ILogger {
 	private transportTarget: ILoggerTransport | null | undefined;
 	private previousTag: string | undefined;
 	private tag: string | undefined;
+	private timezone: string | undefined;
 	private tagOnce: boolean = false;
+	private incomingGroup: IConsoleGroup | undefined;
 
 	constructor(options?: ILoggerOptions) {
 		this.name = options?.name ?? "Logger";
@@ -335,16 +339,28 @@ export class Logger implements ILogger {
 	}
 	protected __fire(severity: Severity, tag?: string, ...args: any[]): Promise<boolean[]> {
 		return new Promise((resolve, reject) => {
-			if (tag && (typeof tag !== "string" || this.tag)) {
+			if (tag && (typeof tag !== "string" || args.length == 0 || this.tag)) {
 				args.unshift(tag);
 				tag = this.tag;
 				this.tag = this.tagOnce ? this.previousTag : this.tag;
 			}
 
-			let message = LoggerMessage.factory({ severity: severity, tag: tag, app_name: this.name }, ...args);
+			let isoTimestamp = new Date().toISOString();
+			let timestamp = this.getTimestamp(isoTimestamp);
+			let time_numoffset = this.getTimeNumOffset(timestamp, isoTimestamp);
+			let message = LoggerMessage.factory(
+				{
+					severity: severity,
+					tag: tag,
+					app_name: this.name,
+					timestamp: timestamp,
+					time_numoffset: time_numoffset,
+				},
+				...args
+			);
 			const __transports = this.transportTarget ? [this.transportTarget] : [...this.transports];
 			this.transportTarget = null;
-			
+
 			Promise.all(
 				__transports.map((transport) => {
 					if (!transport.formatter) {
@@ -352,6 +368,13 @@ export class Logger implements ILogger {
 					}
 					if (!transport.severities) {
 						transport.severities = this.severities;
+					}
+					if (transport instanceof ConsoleTransport) {
+						if (this.incomingGroup) {
+							transport.group(this.incomingGroup);
+						} else {
+							transport.groupEnd();
+						}
 					}
 					return transport.transportLog({ ...message });
 				})
@@ -379,6 +402,73 @@ export class Logger implements ILogger {
 				}
 			}
 		});
+	}
+	protected getTimestamp(defaultTimestamp?: string) {
+		const isoTimestamp = defaultTimestamp ?? new Date().toISOString();
+		let timestamp = isoTimestamp;
+		if (this.timezone && this.timezone.toLowerCase() != "utc") {
+			try {
+				const isoTime = isoTimestamp.split("T")[1];
+				const localeTime = new Date(isoTimestamp).toLocaleTimeString(undefined, { timeZone: this.timezone });
+				const localeDate = new Date(isoTimestamp).toLocaleDateString("en", { timeZone: this.timezone });
+				const year = localeDate.split("/")[2];
+				const month = this.padNumber(localeDate.split("/")[0]);
+				const day = this.padNumber(localeDate.split("/")[1]);
+				const localeTimestamp = `${year}-${month}-${day}T${localeTime}.${isoTime
+					.split(".")[1]
+					.replace("Z", "")}`;
+				timestamp = localeTimestamp;
+			} catch (err: any) {}
+		}
+		return timestamp;
+	}
+	protected padNumber(n: any): string {
+		return `${Math.floor(Math.abs(n))}`.padStart(2, "0");
+	}
+	protected getTimeNumOffset(timestamp: string, defaultTimestamp?: string) {
+		if (!this.timezone || this.timezone?.toLowerCase() == "utc") return undefined;
+		defaultTimestamp = defaultTimestamp ?? new Date().toISOString();
+
+		let d1 = timestamp.split("T")[0].split("-")[2];
+		let d2 = defaultTimestamp.split("T")[0].split("-")[2];
+		let t1 = timestamp.split("T")[1].split(".")[0];
+		let t2 = defaultTimestamp.split("T")[1].split(".")[0];
+
+		let d1Day = parseInt(d1);
+		let d2Day = parseInt(d2);
+		let t1Hour = parseInt(t1.split(":")[0]);
+		let t1Minute = parseInt(t1.split(":")[1]);
+		let t2Hour = parseInt(t2.split(":")[0]);
+		let t2Minute = parseInt(t2.split(":")[1]);
+
+		let dayDiff = d2Day - d1Day;
+		let hourDiff = -(t2Hour - t1Hour);
+		let minuteDiff = t2Minute - t1Minute;
+
+		if (dayDiff != 0) {
+			hourDiff = Math.abs(24 - Math.abs(hourDiff));
+			if (dayDiff > 0) {
+				hourDiff = -hourDiff;
+			}
+		}
+
+		if (minuteDiff != 0) {
+			minuteDiff = 60 - Math.abs(minuteDiff);
+			if (
+				(hourDiff >= 0 && t1Minute - Math.abs(minuteDiff) < 0) ||
+				(hourDiff < 0 && t1Minute + Math.abs(minuteDiff) >= 60)
+			) {
+				if (hourDiff < 0) {
+					hourDiff++;
+				} else {
+					hourDiff--;
+				}
+			}
+		}
+
+		const sign = hourDiff >= 0 ? "+" : "-";
+		const time_numoffset = `${sign}${this.padNumber(hourDiff)}:${this.padNumber(minuteDiff)}`;
+		return time_numoffset;
 	}
 	test(severity: Severity): Promise<boolean[]> {
 		this.withTag("__TEST__");
@@ -444,6 +534,26 @@ export class Logger implements ILogger {
 				this.watchers.set(`${tag}:${severity}`, callback);
 			});
 		});
+	}
+	clone(): Logger {
+		return new Logger({
+			name: this.name,
+			formatter: this.formatter,
+			transports: this.transports,
+			severities: this.severities,
+		});
+	}
+	group(label: string, collapsed: boolean = false): void {
+		this.incomingGroup = {
+			label: label,
+			collapsed: collapsed,
+		};
+	}
+	end(): void {
+		this.incomingGroup = undefined;
+	}
+	setTimezone(timezone: string): void {
+		this.timezone = timezone;
 	}
 	emergency(tag?: string | undefined, ...args: any[]): void {
 		this.__fire(Severity.EMERGENCY, tag, ...args);
