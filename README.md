@@ -1,180 +1,190 @@
-![alt BetterCallLogo](https://raw.githubusercontent.com/skullab/better-call-log/master/src/images/better_call_log_logo.png)
-
-# An Attractive better console
+![alt BetterCallLogo](./images/better_call_log_enhanced_logo.png)
 
 ### Installation
 ```bash
-npm i better-call-log
-```
-### For Browser
-```html
-<script src="node_modules/better-call-log/dist/better-call-log-browser.js"></script>
-```
-### For NodeJS
-```js
-const BetterCall = require('better-call-log') ;
-```
-## Common
-```js
-// Simple console wrapper usage
-const b = new BetterCall.Log();
-b.clear();
-b.info('TEST');
-b.log('TEST');
-b.debug('TEST');
-b.warn('TEST');
-b.error('TEST');
-b.trace();
-b.table({a:1,b:2,c:3},'MY TABLE');
-b.time('my process');
-b.log('test');
-b.timeLog('my process');
-b.assert(true,'hello');
-b.assert(false,'hello again');
-b.timeEnd('my process');
+npm install better-call-log
 ```
 
-## Here's what you will see
-In the browser<br>
-![alt browser-results](https://raw.githubusercontent.com/skullab/better-call-log/master/src/images/browser_results.png)
+> **NOTE:** The enhanced version is available from release 1.0.0 
+<br><span style="color:orange">Old versions are no longer compatible.</span>
 
-In NodeJS<br>
-![alt nodejs-results](https://raw.githubusercontent.com/skullab/better-call-log/master/src/images/nodejs_results.png)
-## Advanced
+### Usage
 ```js
-const b = new BetterCall.Log(name?: string, options?: BetterCallOptions);
-```
-BetterCall LOG is written in Typescript<br>
-The <em>BetterCallOptions</em> class has the default following properties
+import BetterCall from "better-call-log"
 
-```typescript
-public level:BetterCallLevel = BetterCallLevel.ALL ;
-public ignoreAssert:boolean = false;
-public style:BetterCallStyle = typeof window !== 'undefined' ? new BetterCallStyleCSS() : new BetterCallStyleANSI;
-public showTimestamp:boolean = true;
-public compactMode:boolean = false;
-public compactCollapsed:boolean = false;
+const logger = new BetterCall.Logger();
+logger.debug("Hello World !");
+
+// example output : 
+// 2023-09-25T15:15:53.291Z DEBUG Logger : Hello World !
 ```
-You can create an options object like this
+
+### Options
 ```js
-const options = new BetterCall.Options();
-options.level = BetterCall.Level.WARNING;
-options.ignoreAssert = true;
-options.style = new BetterCall.StyleANSI();
-options.compactMode = true;
-options.compactCollapsed = true;
+const logger = new BetterCall.Logger({
+    name: "MyLogger",
+    severities: BetterCall.Severity.WARNING,
+    formatter: new BetterCall.CSSFormatter(),
+    transports: [new BetterCall.ConsoleTransport()]
+});
 ```
-or change the default options like this
-```js
-const b = new BetterCall.Log();
-b.options.level = BetterCall.Level.WARNING;
-b.options.compactMode = true;
-...
+
+When you create a new instance of a logger you can define the logger options.
+```ts
+name:string - the name of the logger
+severities:Severity - the minimum severity to fire log
+formatter:ILoggerFormatter - the formatter to use, by default is SimpleFormatter
+transports:ILoggerTransport[] - the transports to use, by default is ConsoleTransport
 ```
-### Levels
-You can declare a log level with the <em>level</em> option.<br>
-Available log levels are :
+#### Severities
+
+BetterCallLog implements the Syslog Protocol ([RFC 5424](https://datatracker.ietf.org/doc/html/rfc5424)). In descending order of severity, these log levels are: emergency, alert, critical, error, warning, notice, info, and debug.
 
 ```js
-INFO       = 0b00000010,
-LOG        = 0b00000100,
-DEBUG      = 0b00001000,
-WARNING    = 0b00010000,
-ERROR      = 0b00100000,
-OFF        = 0b00000000, 
-ALL        = 0b11111111,
+logger.emergency('some important message...');
+logger.alert('some important message...');
+logger.critical('some important message...');
+logger.error('some important message...');
+logger.err('some important message...'); // alias of error
+logger.warning('some important message...');
+logger.warn('some important message...'); // alias of warning
+logger.notice('some important message...');
+logger.log('some important message...'); // alias of notice
+logger.info('some important message...');
+logger.debug('some important message...');
 ```
-It's possible to concatenate several levels
+
+with the severities option it is possible to limit the sending of messages to a certain level.
 
 ```js
-const b = new BetterCall.Log();
-b.level(BetterCall.Level.DEBUG | BetterCall.Level.WARNING);
-// or in subtraction
-b.level(BetterCall.Level.ALL ^ BetterCall.Level.INFO);
-```
-## Styles
-BetterCall LOG has 2 styles in bundle
-- BetterCallStyleCSS
-- BetterCallStyleANSI
+const logger = new BetterCall.Logger({
+    name: "MyLogger",
+    severities: BetterCall.Severity.WARNING,
+    formatter: new BetterCall.CSSFormatter(),
+    transports: [new BetterCall.ConsoleTransport()]
+});
+logger.emergency('some important message...');
+logger.alert('some important message...');
+logger.critical('some important message...');
+logger.error('some important message...');
+logger.err('some important message...'); // alias of error
+logger.warning('some important message...');
+logger.warn('some important message...'); // alias of warning
 
-You can change style option like this
+// the messages below will not be sent
+logger.notice('some important message...');
+logger.log('some important message...'); // alias of notice
+logger.info('some important message...');
+logger.debug('some important message...');
+```
+
+#### Formatters
+
+All messages are converted according to the syslog protocol specifications.
+Subsequently, using a formatter it is possible to format the message according to a specific model.
+
+#### Available formatters:
+
+- ANSIFormatter
+- CSSFormatter
+- JSONFormatter
+- SimpleFormatter
+- StringFormatter
+- SyslogFormatter
+
+if the formatter is not defined, the default formatter is SimpleFormatter.
+#### Tranports
+
+The transport object has the task of transporting the message to a specific output. It is possible to define more than one tranport in the logger options. 
+
+#### Available transports:
+
+- ConsoleTransport
+- FileTransport
+- HttpTransport
+- IndexedDBTransport
+
+If a transport is not defined, the default transport is ConsoleTransport.
+
+#### Add transport at run-time, specify a temporary transport
+
+You can add or remove a transport at run-time with **addTransport** and **removeTransport**.
+
 ```js
-const b = new BetterCall.Log();
-b.options.style = new BetterCall.StyleCSS();
-b.options.style = new BetterCall.StyleANSI();
+const logger = new BetterCall.Logger({
+    transports: [new BetterCall.ConsoleTranport()]
+});
+logger.addTransport(new BetterCall.HttpTransport({
+    method: "post",
+    url: "http://localhost/logs",
+}));
+logger.debug("Hello World !");
 ```
-> By default, in browser it's used <em>BetterCallStyleCSS</em>, while in NodeJS it's used BetterCallStyleANSI
 
-### Extend Style
-You can extend the <em>BetterCallStyle</em> class to create a custom style.
-```typescript
-public abstract package(tag:string):BetterCallStylePackage;
-```
-You will have to implement the <em>package</em> method which will have to return a <em>BetterCallStylePackage</em> object.
-```typescript
-export class BetterCallStylePackage {
-    public style:string;
-    public tag:string;
-    public order:object;
-}
-```
-The <em>style</em> property will contain the style, the <em>tag</em> property the call tag, while the <em>order</em> property the sort order (zero index) to be shown in the console, if the style before and after the tag or vice versa.
-#### Example
+To specify a temporary transport use the **to** function
+
 ```js
-const b = new BetterCall.Log('my logger');
-class MyStyle extends BetterCall.Style {
-    package(tag){
-        var style = 'color:#FFF;padding:6px;border-radius:2px;font-size:1.2em;';
-        if(tag == 'log'){
-            style += 'background-color:#6f0c55;';
-        }else{
-            style += 'background-color:#808080;';
-        }
-        return {style:style,tag:'%c'+tag.toUpperCase(),order:{tag:0,style:1}};
-    }
-}
-b.options.style = new MyStyle();
-b.log('hello world');
-b.info('hello world');
+const logger = new BetterCall.Logger({
+    transports: [new BetterCall.ConsoleTranport()]
+});
+// define new temporary tranport at run-time
+logger.to(new BetterCall.HttpTransport({
+    method: "post",
+    url: "http://localhost/logs",
+})).debug("Hello World !");
+
+// or define it by name
+const logger = new BetterCall.Logger({
+    transports: [
+        new BetterCall.ConsoleTranport(),
+        new BetterCall.HttpTransport({
+            name:'http'
+            method: "post",
+            url: "http://localhost/logs",
+        })
+    ]
+});
+logger.to('http').debug("Hello World !");
 ```
-#### Result
-![alt custom-style](https://raw.githubusercontent.com/skullab/better-call-log/master/src/images/custom_style.png)
 
-## Static usage
+> **NOTE:** Temporary tranports are only used **once**. By defining the transport by name, any other transports defined in the logger options will not be executed.
 
-BetterCall can be used statically like this
+#### Add a TAG
+
+You can define a TAG for the log message.
 ```js
-BetterCall.Log.warn('Attention please, this is not a test of the emergency broadcast system')
-// or
-const c = BetterCall.Log;
-c.info('hello static world !');
-// get the singleton instance
-BetterCall.Log.getInstance();
-```
-## Luxon Support
+const logger = new BetterCall.Logger({
+    transports: [new BetterCall.ConsoleTranport()]
+});
+logger.debug('MYTAG','hello world');
 
-From version 0.0.8 luxon library support is available for the timestamp
-```js
-const o = new BetterCall.Options();
-o.timeZone = "Europe/Rome";
-o.locale = "it-IT"
-o.useISOTime = true ;
+// example output : 
+// 2023-09-25T15:14:40.661Z DEBUG Logger::MYTAG : hello world
 ```
-## File Transport (NodeJS only)
+This way the tag is set dynamically, but it is possible to define a global TAG.
 
-From version 0.0.8 you can write a log to file
 ```js
-// Usage
-const o = new BetterCall.Options();
-o.fileTransport = new BetterCall.Transport('./my_logger.log');
-// Or with options
-o.fileTransport = new BetterCall.Transport('./my_logger_once.log',{flag:"w+"});
-...
-// Class details
-export class BetterCallTransport {
-    constructor(filename: string, options?: fs.WriteFileOptions, throwable?: boolean){
-        ...
-    }
-}
+const logger = new BetterCall.Logger({
+    transports: [new BetterCall.ConsoleTransport()]
+});
+logger.setTag('MYTAG');
+logger.debug('hello world');
+logger.debug('an other message');
 ```
-If *fileTransport* is set, every call to log,debug,info,warn,error ecc... will be transferred to a file. By default, logs are appends to file.
+
+it is possible to define a temporary TAG with the **withTag** function.
+
+```js
+const logger = new BetterCall.Logger({
+    transports: [new BetterCall.ConsoleTransport()]
+});
+logger.setTag('MYTAG');
+logger.debug('hello world');
+logger.withTag('OTHERTAG').debug('an other message');
+logger.info('important message');
+
+// example output : 
+// 2023-09-25T15:17:43.598Z DEBUG Logger::MYTAG : hello world
+// 2023-09-25T15:17:43.599Z DEBUG Logger::OTHERTAG : an other message
+// 2023-09-25T15:17:43.600Z INFO Logger::MYTAG : important message
+```
