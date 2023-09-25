@@ -5,7 +5,7 @@
 npm install better-call-log
 ```
 
-> **NOTE:** The enhanced version is available from release 1.0.0 
+> **NOTE:** The enhanced version is available from release 1.0.x 
 <br><span style="color:orange">Old versions are no longer compatible.</span>
 
 ### Usage
