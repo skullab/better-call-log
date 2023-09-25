@@ -1,4 +1,4 @@
-![alt BetterCallLogo](./images/better_call_log_enhanced_logo.png)
+![alt BetterCallLogo](https://raw.githubusercontent.com/skullab/better-call-log/master/images/better_call_log_enhanced_logo.png)
 
 ### Installation
 ```bash
