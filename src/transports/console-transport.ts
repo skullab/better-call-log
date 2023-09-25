@@ -1,19 +1,14 @@
 import { ILoggerMessage, Severity } from "../core/logger";
-import { ConsoleLevel, Transport } from "./transport";
+import { ConsoleLevel, Groupable, IGroupOptions, Transport } from "./transport";
 
-export interface IConsoleGroup {
-	label:string;
-	collapsed:boolean;
-}
-
-export class ConsoleTransport extends Transport {
-	protected incomingGroup:IConsoleGroup|undefined;
+export class ConsoleTransport extends Transport implements Groupable {
+	protected incomingGroup:IGroupOptions|undefined;
 	private grouping:boolean = false;
 	private ending:boolean = false;
-	group(options:IConsoleGroup){
+	group(options: IGroupOptions): void {
 		this.incomingGroup = options;
 	}
-	groupEnd(){
+	groupEnd(): void {
 		this.ending = true;
 	}
 	transportLog(message: ILoggerMessage): Promise<boolean> {

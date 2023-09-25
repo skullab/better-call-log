@@ -12,7 +12,7 @@ export class HttpTransport extends Transport {
 	}
 
 	transportLog(message: ILoggerMessage): Promise<boolean> {
-		return new Promise(async (resolve, reject) => {
+		return new Promise((resolve, reject) => {
 			try {
 				let severity: Severity = this.getSeverity(message.prival);
 				if (!this.isFireable(severity)) return resolve(false);
@@ -21,11 +21,13 @@ export class HttpTransport extends Transport {
 					this.axiosConfig.method?.toLowerCase() === "post"
 						? { data: { log: formattedMessage } }
 						: { params: { log: JSON.stringify(formattedMessage) } };
-				const { status } = await axios(Object.assign({}, this.axiosConfig, payload));
-				if (status < 200 || status >= 300) {
-					return resolve(false);
-				}
-				return resolve(true);
+				axios(Object.assign({}, this.axiosConfig, payload))
+					.then(() => {
+						resolve(true);
+					})
+					.catch(() => {
+						resolve(false);
+					});
 			} catch (e: any) {
 				reject(e);
 			}

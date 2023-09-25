@@ -1,5 +1,6 @@
 import { SimpleFormatter } from "../formatters/simple-formatter";
-import { ConsoleTransport, IConsoleGroup } from "../transports/console-transport";
+import { ConsoleTransport } from "../transports/console-transport";
+import { IGroupOptions } from "../transports/transport";
 
 export enum Severity {
 	EMERGENCY,
@@ -292,7 +293,7 @@ export interface ILoggerListener {
 
 export interface ILoggerOptions {
 	name?: string;
-	severities?: Severity[];
+	severities?: Severity | Severity[];
 	formatter?: ILoggerFormatter;
 	transports?: ILoggerTransport[];
 }
@@ -326,11 +327,16 @@ export class Logger implements ILogger {
 	private tag: string | undefined;
 	private timezone: string | undefined;
 	private tagOnce: boolean = false;
-	private incomingGroup: IConsoleGroup | undefined;
+	private incomingGroup: IGroupOptions | undefined;
 
 	constructor(options?: ILoggerOptions) {
 		this.name = options?.name ?? "Logger";
-		this.severities = options?.severities;
+		this.severities =
+			options?.severities && Array.isArray(options?.severities)
+				? options.severities
+				: options?.severities && !Array.isArray(options.severities)
+				? [options.severities]
+				: undefined;
 		this.formatter = options?.formatter ?? new SimpleFormatter();
 		this.transports = options?.transports ?? [new ConsoleTransport()];
 	}
@@ -369,12 +375,10 @@ export class Logger implements ILogger {
 					if (!transport.severities) {
 						transport.severities = this.severities;
 					}
-					if (transport instanceof ConsoleTransport) {
-						if (this.incomingGroup) {
-							transport.group(this.incomingGroup);
-						} else {
-							transport.groupEnd();
-						}
+					if ("group" in transport && typeof transport.group == "function" && this.incomingGroup) {
+						transport.group(this.incomingGroup);
+					} else if ("groupEnd" in transport && typeof transport.groupEnd == "function") {
+						transport.groupEnd();
 					}
 					return transport.transportLog({ ...message });
 				})

@@ -14,6 +14,15 @@ export interface ITransportOptions {
 	formatter?: ILoggerFormatter;
 }
 
+export interface IGroupOptions {
+	label:string;
+	collapsed:boolean;
+}
+export interface Groupable {
+	group(options:IGroupOptions):void;
+	groupEnd():void;
+}
+
 export abstract class Transport implements ILoggerTransport {
 	name?: string;
 	severities?: Severity[] | undefined;

@@ -22,7 +22,7 @@ export class IndexedDBTransport extends Transport {
 			if (!this.isFireable(severity)) return resolve(false);
 			const content = this.formatter?.format(message);
 			const level = Severity[severity];
-			if (!window["indexedDB"]) return resolve(false);
+			if (typeof window == 'undefined' || !window["indexedDB"]) return resolve(false);
 			try {
 				const dbRequest = window.indexedDB.open(this.dbName, this.dbVersion);
 				dbRequest.onupgradeneeded = (event: any) => {

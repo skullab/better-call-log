@@ -4,9 +4,9 @@
 	"type": "module",
 	"main": "./dist/better-call-log.umd.cjs",
 	"module": "./dist/better-call-log.js",
-	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
+			"types": "./dist/index.d.ts",
 			"import": "./dist/better-call-log.js",
 			"require": "./dist/better-call-log.umd.cjs"
 		}

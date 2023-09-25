@@ -27,14 +27,18 @@
 				transports: [
 					new BetterCall.ConsoleTransport({
 						formatter: new BetterCall.CSSFormatter(),
+						severities: [BetterCall.Severity.DEBUG]
 					}),
 					new BetterCall.HttpTransport({
 						method: "get",
-						url: "http://127.0.0.1:5500/test/manual/index.html",
+						url: "http://127.0.0.1:5501/test/manual/index.html",
 						// formatter: new BetterCall.JSONFormatter(["timestamp", "tag", "app_name", "args"]),
 					}),
+					new BetterCall.FileTransport({
+						filename:'test.log'
+					})
 				],
-				severities: [logLevel],
+				severities: [BetterCall.Severity.WARNING],
 			});
 
 			logger.setTimezone('Asia/Yangon');
@@ -50,10 +54,13 @@
 			logger.setTimezone('America/New_York');
 			logger.setTimezone('Europe/Rome');
 			logger.setTimezone('Asia/Ust-Nera');
+			logger.setTimezone('Asia/Srednekolymsk');
+			logger.setTimezone('Pacific/Honolulu');
 
 			logger.debug('hello');
 			logger.setTag("MYTAG");
 			logger.debug('hello');
+			logger.notice('hello');
 
 			logger.watch("*", [0, 1, 2, 3, 4, 5], (message) => {
 				const formatter = new BetterCall.StringFormatter();
@@ -65,7 +72,7 @@
 				.to(
 					new BetterCall.HttpTransport({
 						method: "get",
-						url: "http://127.0.0.1:5500/test/manual/index.html",
+						url: "http://127.0.0.1:5501/test/manual/index.html",
 						formatter: new BetterCall.JSONFormatter(["timestamp", "tag", "app_name", "args"]),
 					})
 				)
