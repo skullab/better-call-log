@@ -48,6 +48,7 @@
 		"build": "tsc && vite build",
 		"watch": "tsc && vite build --watch",
 		"preview": "vite preview",
+		"safe-publish": "npm run build && npm publish",
 		"test": "jest"
 	},
 	"devDependencies": {
