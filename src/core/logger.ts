@@ -168,7 +168,7 @@ export class LoggerMessage implements ILoggerMessage {
 
 		const sd_elements: string[] = [];
 		args.forEach((a) => {
-			if (typeof a === "object") {
+			if (a && typeof a === "object") {
 				for (const [key, value] of Object.entries(a)) {
 					let sd_param = key + "=" + LoggerMessage.DOUBLE_QUOTE + value + LoggerMessage.DOUBLE_QUOTE;
 					let sd_id =
