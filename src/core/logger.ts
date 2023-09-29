@@ -328,6 +328,7 @@ export class Logger implements ILogger {
 	private timezone: string | undefined;
 	private tagOnce: boolean = false;
 	private incomingGroup: IGroupOptions | undefined;
+	private lastMessage: ILoggerMessage | undefined;
 
 	constructor(options?: ILoggerOptions) {
 		this.name = options?.name ?? "Logger";
@@ -345,12 +346,11 @@ export class Logger implements ILogger {
 	}
 	protected __fire(severity: Severity, tag?: string, ...args: any[]): Promise<boolean[]> {
 		return new Promise((resolve, reject) => {
-			if (tag && (typeof tag !== "string" || args.length == 0 || this.tag)) {
+			const computedTag = this.getTag(tag);
+			if (tag !== computedTag) {
 				args.unshift(tag);
-				tag = this.tag;
-				this.tag = this.tagOnce ? this.previousTag : this.tag;
 			}
-
+			tag = computedTag;
 			let isoTimestamp = new Date().toISOString();
 			let timestamp = this.getTimestamp(isoTimestamp);
 			let time_numoffset = this.getTimeNumOffset(timestamp, isoTimestamp);
@@ -364,6 +364,7 @@ export class Logger implements ILogger {
 				},
 				...args
 			);
+			this.lastMessage = message;
 			const __transports = this.transportTarget ? [this.transportTarget] : [...this.transports];
 			this.transportTarget = null;
 
@@ -474,9 +475,12 @@ export class Logger implements ILogger {
 		const time_numoffset = `${sign}${this.padNumber(hourDiff)}:${this.padNumber(minuteDiff)}`;
 		return time_numoffset;
 	}
-	test(severity: Severity): Promise<boolean[]> {
+	test(severity: Severity, tag?: string, ...args: any[]): Promise<boolean[]> {
 		this.withTag("__TEST__");
-		return this.__fire(severity, "called by test function");
+		return this.__fire(severity, tag, ...args);
+	}
+	testNoTag(severity: Severity, tag?: string, ...args: any[]): Promise<boolean[]> {
+		return this.__fire(severity, tag, ...args);
 	}
 	addTransport(transport: ILoggerTransport): void {
 		this.transports.push(transport);
@@ -512,6 +516,24 @@ export class Logger implements ILogger {
 	}
 	withTag(tag: string): ILogger {
 		return this.setTag(tag, true);
+	}
+	getTag(tag?: string | undefined | null): string | undefined {
+		if (tag && typeof tag == "string" && !this.tag) {
+			return tag;
+		}
+		tag = this.tag;
+		this.tag = this.tagOnce ? this.previousTag : this.tag;
+		this.tagOnce = false;
+		return tag;
+	}
+	resetTag(): ILogger {
+		this.previousTag = undefined;
+		this.tag = undefined;
+		this.tagOnce = false;
+		return this;
+	}
+	getLastMessage(): ILoggerMessage | undefined {
+		return this.lastMessage;
 	}
 	watch(tag: string, severity: Severity, callback: (message: ILoggerMessage) => void): void;
 	watch(tag: string, severity: string, callback: (message: ILoggerMessage) => void): void;
