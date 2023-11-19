@@ -10,17 +10,17 @@ export enum ConsoleLevel {
 
 export interface ITransportOptions {
 	name?: string;
-	severities?: Severity[];
+	severities?: Severity | Severity[];
 	formatter?: ILoggerFormatter;
 }
 
 export interface IGroupOptions {
-	label:string;
-	collapsed:boolean;
+	label: string;
+	collapsed: boolean;
 }
 export interface Groupable {
-	group(options:IGroupOptions):void;
-	groupEnd():void;
+	group(options: IGroupOptions): void;
+	groupEnd(): void;
 }
 
 export abstract class Transport implements ILoggerTransport {
@@ -30,7 +30,12 @@ export abstract class Transport implements ILoggerTransport {
 	constructor(options?: ITransportOptions) {
 		this.name = options?.name;
 		this.formatter = options?.formatter;
-		this.severities = options?.severities;
+		this.severities =
+			options?.severities && Array.isArray(options.severities)
+				? options?.severities
+				: options?.severities && !Array.isArray(options.severities)
+				? [options.severities]
+				: undefined;
 	}
 	getSeverity(prival: number): Severity {
 		return prival - Math.trunc(prival / 8) * 8;

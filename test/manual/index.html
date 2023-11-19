@@ -27,7 +27,7 @@
 				transports: [
 					new BetterCall.ConsoleTransport({
 						formatter: new BetterCall.CSSFormatter(),
-						severities: [BetterCall.Severity.DEBUG]
+						severities: BetterCall.Severity.DEBUG
 					}),
 					new BetterCall.HttpTransport({
 						method: "get",
@@ -38,7 +38,7 @@
 						filename:'test.log'
 					})
 				],
-				severities: [BetterCall.Severity.WARNING],
+				severities: BetterCall.Severity.WARNING,
 			});
 
 			logger.setTimezone('Asia/Yangon');
